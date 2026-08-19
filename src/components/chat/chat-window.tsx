@@ -135,8 +135,7 @@ export function ChatWindow({
 
       <div className="mx-auto w-full max-w-3xl px-4 pb-6">
         <PromptInput
-          onSubmit={(message, event) => {
-            event.currentTarget.reset();
+          onSubmit={(message) => {
             submit(message.text ?? "");
           }}
         >
