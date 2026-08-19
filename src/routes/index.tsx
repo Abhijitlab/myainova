@@ -21,15 +21,19 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: RedirectFallback,
-  beforeLoad: () => {
-    if (typeof window === "undefined") return;
-    const threads = loadThreads();
-    const threadId = threads[0]?.id ?? createThreadId();
-    throw redirect({ to: "/c/$threadId", params: { threadId } });
-  },
 });
 
+// The redirect runs on the client: thread history lives in localStorage, which
+// is unavailable during SSR/prerender.
 function RedirectFallback() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const threads = loadThreads();
+    const threadId = threads[0]?.id ?? createThreadId();
+    void navigate({ to: "/c/$threadId", params: { threadId }, replace: true });
+  }, [navigate]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <p className="text-sm text-muted-foreground">Opening Nova…</p>
