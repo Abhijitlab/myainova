@@ -28,14 +28,25 @@ export const Route = createFileRoute("/c/$threadId")({
 
 function ChatThreadPage() {
   const { threadId } = Route.useParams();
+  const [hydrated, setHydrated] = useState(false);
   const { threads, ensureThread, persistMessages, renameThread, deleteThread } =
     useChatThreads(threadId);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     ensureThread(threadId);
   }, [threadId, ensureThread]);
 
   const activeThread = threads.find((thread) => thread.id === threadId);
+
+  // Thread history lives in localStorage, so the first paint must match the
+  // server-rendered shell before the stored threads are shown.
+  if (!hydrated) {
+    return <div className="h-screen w-full bg-background" />;
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
