@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { ChatWindow } from "@/components/chat/chat-window";
+import { SettingsDialog } from "@/components/chat/settings-dialog";
 import { useChatThreads } from "@/hooks/use-chat-threads";
+import { useSettings } from "@/hooks/use-settings";
 
 export const Route = createFileRoute("/c/$threadId")({
   head: () => ({
@@ -29,6 +31,9 @@ export const Route = createFileRoute("/c/$threadId")({
 function ChatThreadPage() {
   const { threadId } = Route.useParams();
   const [hydrated, setHydrated] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { settings, update, toggleTheme } = useSettings();
   const { threads, ensureThread, persistMessages, renameThread, deleteThread } =
     useChatThreads(threadId);
 
@@ -53,17 +58,32 @@ function ChatThreadPage() {
       <ChatSidebar
         threads={threads}
         activeThreadId={threadId}
+        collapsed={collapsed}
+        theme={settings.theme}
+        displayName={settings.displayName}
+        onToggleCollapsed={() => setCollapsed((current) => !current)}
+        onToggleTheme={toggleTheme}
+        onOpenSettings={() => setSettingsOpen(true)}
         onRename={renameThread}
         onDelete={deleteThread}
       />
       <main className="flex min-w-0 flex-1 flex-col">
         <ChatWindow
-          key={threadId}
+          key={`${threadId}-${settings.mockMode ? "mock" : "live"}`}
           threadId={threadId}
+          title={activeThread?.title ?? "New chat"}
           initialMessages={activeThread?.messages ?? []}
+          settings={settings}
           onMessagesChange={persistMessages}
+          onModelChange={(model) => update({ model })}
         />
       </main>
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        settings={settings}
+        onUpdate={update}
+      />
     </div>
   );
 }
