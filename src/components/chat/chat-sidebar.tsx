@@ -39,18 +39,20 @@ const DAY = 24 * 60 * 60 * 1000;
 
 function groupThreads(threads: ChatThread[]) {
   const now = Date.now();
-  const groups: { label: string; items: ChatThread[] }[] = [
-    { label: "Today", items: [] },
-    { label: "Previous 7 Days", items: [] },
-    { label: "Older", items: [] },
-  ];
+  const today: ChatThread[] = [];
+  const week: ChatThread[] = [];
+  const older: ChatThread[] = [];
   for (const thread of threads) {
     const age = now - thread.updatedAt;
-    if (age < DAY) groups[0].items.push(thread);
-    else if (age < 7 * DAY) groups[1].items.push(thread);
-    else groups[2].items.push(thread);
+    if (age < DAY) today.push(thread);
+    else if (age < 7 * DAY) week.push(thread);
+    else older.push(thread);
   }
-  return groups.filter((group) => group.items.length > 0);
+  return [
+    { label: "Today", items: today },
+    { label: "Previous 7 Days", items: week },
+    { label: "Older", items: older },
+  ].filter((group) => group.items.length > 0);
 }
 
 export function ChatSidebar({
