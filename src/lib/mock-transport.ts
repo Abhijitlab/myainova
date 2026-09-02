@@ -43,7 +43,7 @@ function lastUserText(messages: UIMessage[]) {
 export class MockChatTransport implements ChatTransport<UIMessage> {
   async sendMessages(options: {
     messages: UIMessage[];
-    abortSignal?: AbortSignal;
+    abortSignal: AbortSignal | undefined;
   }): Promise<ReadableStream<UIMessageChunk>> {
     const text = mockAnswer(lastUserText(options.messages));
     const tokens = text.match(/\s*\S+/g) ?? [text];
