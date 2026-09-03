@@ -31,7 +31,7 @@ import {
 import {
   PromptInput,
   PromptInputFooter,
-  PromptInputFooter,
+
   PromptInputProvider,
   PromptInputSubmit,
   PromptInputTextarea,
