@@ -30,7 +30,7 @@ import {
 } from "@/components/ai-elements/message";
 import {
   PromptInput,
-  PromptInputActionAddAttachments,
+  PromptInputFooter,
   PromptInputFooter,
   PromptInputProvider,
   PromptInputSubmit,
