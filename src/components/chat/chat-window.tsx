@@ -287,9 +287,9 @@ export function ChatWindow({
             <PromptInputTextarea placeholder="Message Nova…  (Enter to send, Shift+Enter for a new line)" />
             <PromptInputFooter>
               <PromptInputTools>
-                <PromptInputActionAddAttachments />
                 <VoiceInputButton disabled={isBusy} />
               </PromptInputTools>
+
               <PromptInputSubmit
                 size="icon-sm"
                 status={status}
