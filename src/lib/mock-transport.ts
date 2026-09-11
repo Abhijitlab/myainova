@@ -15,7 +15,9 @@ function mockAnswer(prompt: string, imageCount: number) {
       "### Visual analysis",
       "- The image appears clear enough for object, scene, text, and layout analysis.",
       "- A live multimodal model can describe visible details, extract text, or answer questions about it.",
-      prompt ? `- Your request was: **${prompt.slice(0, 140)}**` : "- Add a question to focus the analysis on a specific detail.",
+      prompt
+        ? `- Your request was: **${prompt.slice(0, 140)}**`
+        : "- Add a question to focus the analysis on a specific detail.",
       "\nTurn mock mode off in Settings to analyze the actual image.",
     ].join("\n");
   }
@@ -29,7 +31,7 @@ function mockAnswer(prompt: string, imageCount: number) {
     "```ts",
     "// Example snippet rendered by the markdown pipeline",
     "export function greet(name: string) {",
-    '  return `Hello, ${name}!`;',
+    "  return `Hello, ${name}!`;",
     "}",
     "```\n",
     "Anything else you'd like me to expand on?",
@@ -49,9 +51,10 @@ function lastUserText(messages: UIMessage[]) {
 
 function lastUserImageCount(messages: UIMessage[]) {
   const lastUser = [...messages].reverse().find((message) => message.role === "user");
-  return lastUser?.parts.filter(
-    (part) => part.type === "file" && part.mediaType.startsWith("image/"),
-  ).length ?? 0;
+  return (
+    lastUser?.parts.filter((part) => part.type === "file" && part.mediaType.startsWith("image/"))
+      .length ?? 0
+  );
 }
 
 /**

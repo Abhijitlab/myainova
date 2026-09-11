@@ -58,10 +58,26 @@ import { MODEL_OPTIONS, type AppSettings, type ModelId } from "@/lib/settings-st
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
-  { icon: Lightbulb, title: "Explain a concept", prompt: "Explain how vector databases work, with a simple analogy." },
-  { icon: Code2, title: "Debug code", prompt: "Here's a bug in my React code — help me find and fix it:" },
-  { icon: Mail, title: "Draft an email", prompt: "Draft a polite follow-up email after a job interview." },
-  { icon: Sparkle, title: "Brainstorm ideas", prompt: "Brainstorm 10 product ideas for a small indie software studio." },
+  {
+    icon: Lightbulb,
+    title: "Explain a concept",
+    prompt: "Explain how vector databases work, with a simple analogy.",
+  },
+  {
+    icon: Code2,
+    title: "Debug code",
+    prompt: "Here's a bug in my React code — help me find and fix it:",
+  },
+  {
+    icon: Mail,
+    title: "Draft an email",
+    prompt: "Draft a polite follow-up email after a job interview.",
+  },
+  {
+    icon: Sparkle,
+    title: "Brainstorm ideas",
+    prompt: "Brainstorm 10 product ideas for a small indie software studio.",
+  },
 ];
 
 type ChatWindowProps = {
@@ -308,11 +324,7 @@ export function ChatWindow({
                 <VoiceInputButton disabled={isBusy} />
               </PromptInputTools>
 
-              <PromptInputSubmit
-                size="icon-sm"
-                status={status}
-                onStop={() => void stop()}
-              />
+              <PromptInputSubmit size="icon-sm" status={status} onStop={() => void stop()} />
             </PromptInputFooter>
           </PromptInput>
         </PromptInputProvider>
