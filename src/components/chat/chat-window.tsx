@@ -343,7 +343,7 @@ function ImageUploadButton({ disabled }: { disabled: boolean }) {
     <PromptInputButton
       disabled={disabled}
       aria-label="Attach images"
-      tooltip="Attach images"
+      title="Attach images"
       onClick={() => attachments.openFileDialog()}
     >
       <Paperclip className="size-4" />
