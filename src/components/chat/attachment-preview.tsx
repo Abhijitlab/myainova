@@ -7,11 +7,11 @@ export function AttachmentPreview() {
   if (attachments.files.length === 0) return null;
 
   return (
-    <div className="mb-2 flex flex-wrap gap-2" aria-label="Pending attachments">
+    <div className="flex flex-wrap gap-2" aria-label="Pending attachments">
       {attachments.files.map((file) => (
         <div
           key={file.id}
-          className="group relative size-16 overflow-hidden rounded-lg border border-border bg-muted"
+          className="group relative size-16 overflow-hidden rounded-md border border-border bg-muted"
         >
           <img
             src={file.url}

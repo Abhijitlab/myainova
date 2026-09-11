@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport, type FileUIPart, type UIMessage } from "ai";
 import {
   Check,
   Code2,
@@ -9,6 +9,7 @@ import {
   Mail,
   Mic,
   MicOff,
+  Paperclip,
   RefreshCw,
   Sparkle,
   ThumbsDown,
@@ -30,15 +31,19 @@ import {
 } from "@/components/ai-elements/message";
 import {
   PromptInput,
+  PromptInputButton,
   PromptInputFooter,
-
+  PromptInputHeader,
   PromptInputProvider,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
+  usePromptInputAttachments,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { AttachmentPreview } from "@/components/chat/attachment-preview";
+import { MessageImage } from "@/components/chat/image-lightbox";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -53,10 +58,26 @@ import { MODEL_OPTIONS, type AppSettings, type ModelId } from "@/lib/settings-st
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
-  { icon: Lightbulb, title: "Explain a concept", prompt: "Explain how vector databases work, with a simple analogy." },
-  { icon: Code2, title: "Debug code", prompt: "Here's a bug in my React code — help me find and fix it:" },
-  { icon: Mail, title: "Draft an email", prompt: "Draft a polite follow-up email after a job interview." },
-  { icon: Sparkle, title: "Brainstorm ideas", prompt: "Brainstorm 10 product ideas for a small indie software studio." },
+  {
+    icon: Lightbulb,
+    title: "Explain a concept",
+    prompt: "Explain how vector databases work, with a simple analogy.",
+  },
+  {
+    icon: Code2,
+    title: "Debug code",
+    prompt: "Here's a bug in my React code — help me find and fix it:",
+  },
+  {
+    icon: Mail,
+    title: "Draft an email",
+    prompt: "Draft a polite follow-up email after a job interview.",
+  },
+  {
+    icon: Sparkle,
+    title: "Brainstorm ideas",
+    prompt: "Brainstorm 10 product ideas for a small indie software studio.",
+  },
 ];
 
 type ChatWindowProps = {
@@ -111,10 +132,10 @@ export function ChatWindow({
   }, [messages, status, threadId, onMessagesChange]);
 
   const submit = useCallback(
-    (text: string) => {
+    (text: string, files: FileUIPart[] = []) => {
       const trimmed = text.trim();
-      if (!trimmed || isBusy) return;
-      void sendMessage({ text: trimmed });
+      if ((!trimmed && files.length === 0) || isBusy) return;
+      return sendMessage({ text: trimmed, files });
     },
     [isBusy, sendMessage],
   );
@@ -208,6 +229,12 @@ export function ChatWindow({
                         <MessageResponse key={`${message.id}-${index}`}>
                           {part.text}
                         </MessageResponse>
+                      ) : part.type === "file" && part.mediaType.startsWith("image/") ? (
+                        <MessageImage
+                          key={`${message.id}-${index}`}
+                          src={part.url}
+                          alt={part.filename ?? "Uploaded image"}
+                        />
                       ) : null,
                     )}
                   </MessageContent>
@@ -280,21 +307,24 @@ export function ChatWindow({
       <div className="mx-auto w-full max-w-3xl px-4 pb-6">
         <PromptInputProvider>
           <PromptInput
-            onSubmit={(message) => {
-              submit(message.text ?? "");
-            }}
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            maxFiles={4}
+            maxFileSize={8 * 1024 * 1024}
+            globalDrop
+            onSubmit={(message) => submit(message.text, message.files)}
           >
+            <PromptInputHeader className="block px-3 pt-3 empty:hidden">
+              <AttachmentPreview />
+            </PromptInputHeader>
             <PromptInputTextarea placeholder="Message Nova…  (Enter to send, Shift+Enter for a new line)" />
             <PromptInputFooter>
               <PromptInputTools>
+                <ImageUploadButton disabled={isBusy} />
                 <VoiceInputButton disabled={isBusy} />
               </PromptInputTools>
 
-              <PromptInputSubmit
-                size="icon-sm"
-                status={status}
-                onStop={() => void stop()}
-              />
+              <PromptInputSubmit size="icon-sm" status={status} onStop={() => void stop()} />
             </PromptInputFooter>
           </PromptInput>
         </PromptInputProvider>
@@ -303,6 +333,21 @@ export function ChatWindow({
         </p>
       </div>
     </div>
+  );
+}
+
+function ImageUploadButton({ disabled }: { disabled: boolean }) {
+  const attachments = usePromptInputAttachments();
+
+  return (
+    <PromptInputButton
+      disabled={disabled}
+      aria-label="Attach images"
+      title="Attach images"
+      onClick={() => attachments.openFileDialog()}
+    >
+      <Paperclip className="size-4" />
+    </PromptInputButton>
   );
 }
 
