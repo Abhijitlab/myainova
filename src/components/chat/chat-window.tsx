@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport, type FileUIPart, type UIMessage } from "ai";
 import {
   Check,
   Code2,
@@ -33,6 +33,7 @@ import {
   PromptInput,
   PromptInputButton,
   PromptInputFooter,
+  PromptInputHeader,
   PromptInputProvider,
   PromptInputSubmit,
   PromptInputTextarea,
@@ -115,9 +116,9 @@ export function ChatWindow({
   }, [messages, status, threadId, onMessagesChange]);
 
   const submit = useCallback(
-    (text: string, files: Parameters<typeof sendMessage>[0] extends infer T ? T extends { files?: infer F } ? F : never : never = []) => {
+    (text: string, files: FileUIPart[] = []) => {
       const trimmed = text.trim();
-      if ((!trimmed && (!files || Array.from(files).length === 0)) || isBusy) return;
+      if ((!trimmed && files.length === 0) || isBusy) return;
       return sendMessage({ text: trimmed, files });
     },
     [isBusy, sendMessage],
@@ -297,7 +298,9 @@ export function ChatWindow({
             globalDrop
             onSubmit={(message) => submit(message.text, message.files)}
           >
-            <AttachmentPreview />
+            <PromptInputHeader className="block px-3 pt-3 empty:hidden">
+              <AttachmentPreview />
+            </PromptInputHeader>
             <PromptInputTextarea placeholder="Message Nova…  (Enter to send, Shift+Enter for a new line)" />
             <PromptInputFooter>
               <PromptInputTools>
