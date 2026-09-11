@@ -9,6 +9,7 @@ import {
   Mail,
   Mic,
   MicOff,
+  Paperclip,
   RefreshCw,
   Sparkle,
   ThumbsDown,
@@ -30,15 +31,18 @@ import {
 } from "@/components/ai-elements/message";
 import {
   PromptInput,
+  PromptInputButton,
   PromptInputFooter,
-
   PromptInputProvider,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
+  usePromptInputAttachments,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { AttachmentPreview } from "@/components/chat/attachment-preview";
+import { MessageImage } from "@/components/chat/image-lightbox";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -111,10 +115,10 @@ export function ChatWindow({
   }, [messages, status, threadId, onMessagesChange]);
 
   const submit = useCallback(
-    (text: string) => {
+    (text: string, files: Parameters<typeof sendMessage>[0] extends infer T ? T extends { files?: infer F } ? F : never : never = []) => {
       const trimmed = text.trim();
-      if (!trimmed || isBusy) return;
-      void sendMessage({ text: trimmed });
+      if ((!trimmed && (!files || Array.from(files).length === 0)) || isBusy) return;
+      return sendMessage({ text: trimmed, files });
     },
     [isBusy, sendMessage],
   );
@@ -208,6 +212,12 @@ export function ChatWindow({
                         <MessageResponse key={`${message.id}-${index}`}>
                           {part.text}
                         </MessageResponse>
+                      ) : part.type === "file" && part.mediaType.startsWith("image/") ? (
+                        <MessageImage
+                          key={`${message.id}-${index}`}
+                          src={part.url}
+                          alt={part.filename ?? "Uploaded image"}
+                        />
                       ) : null,
                     )}
                   </MessageContent>
@@ -280,13 +290,18 @@ export function ChatWindow({
       <div className="mx-auto w-full max-w-3xl px-4 pb-6">
         <PromptInputProvider>
           <PromptInput
-            onSubmit={(message) => {
-              submit(message.text ?? "");
-            }}
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            maxFiles={4}
+            maxFileSize={8 * 1024 * 1024}
+            globalDrop
+            onSubmit={(message) => submit(message.text, message.files)}
           >
+            <AttachmentPreview />
             <PromptInputTextarea placeholder="Message Nova…  (Enter to send, Shift+Enter for a new line)" />
             <PromptInputFooter>
               <PromptInputTools>
+                <ImageUploadButton disabled={isBusy} />
                 <VoiceInputButton disabled={isBusy} />
               </PromptInputTools>
 
@@ -303,6 +318,21 @@ export function ChatWindow({
         </p>
       </div>
     </div>
+  );
+}
+
+function ImageUploadButton({ disabled }: { disabled: boolean }) {
+  const attachments = usePromptInputAttachments();
+
+  return (
+    <PromptInputButton
+      disabled={disabled}
+      aria-label="Attach images"
+      tooltip="Attach images"
+      onClick={() => attachments.openFileDialog()}
+    >
+      <Paperclip className="size-4" />
+    </PromptInputButton>
   );
 }
 
